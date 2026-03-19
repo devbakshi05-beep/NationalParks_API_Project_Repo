@@ -20,6 +20,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options  => options.UseSqlSe
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.WebHost.UseUrls("http://0.0.0.0:10000");
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<INationalParkRepository, NationalParkRepository>();
 builder.Services.AddScoped<ITrailRepository, TrailRepository>();
@@ -55,11 +56,8 @@ builder.Services.AddAuthentication(x =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
