@@ -11,4 +11,4 @@ WORKDIR /app
 
 COPY --from=build /app/out .
 
-ENTRYPOINT ["dotnet", "NationalParks_API_Project_Repo.dll"]
+ENTRYPOINT ["dotnet", "NationalParks_API_Project.dll"]
