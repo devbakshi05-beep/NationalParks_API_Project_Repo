@@ -1,0 +1,129 @@
+﻿@model WebApplicationOfNationalParks.Models.ViewModels.IndexVM
+@{
+    ViewData["Title"] = "Home Page";
+}
+@foreach (var nationalPark in Model.NationalParkList)
+{
+    <div class="card border">
+        <hr />
+        <div class="card-header bg-dark text-light ml-0 row container">
+            <div class="col-12 col-md-6">
+                <h3 class="text-warning">@nationalPark.Name</h3>
+            </div>
+            <div class="col-12 col-md-6 text-md-right">
+                <h3 class="text-warning">State : @nationalPark.State</h3>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="container rounded p-2">
+                <div class="row">
+                    <div class="col-12 col-lg-8">
+                        <div class="row">
+                            <div class="col-12">
+                                <h3 style="color:#bbb9b9">Established:@nationalPark.Established.Year </h3>
+                            </div>
+                            <div class="col-12">
+                                <table class="table table-striped" style="border:1px solid #808080 ">
+                                    <thead>
+                                        <tr class="table-secondary">
+                                            <th>
+                                                Trail
+                                            </th>
+                                            <th>Distance</th>
+                                            <th>Elevation Gain</th>
+                                            <th>Difficulty</th>
+                                        </tr>
+                                    </thead>
+                                    @{
+                                        var trails = Model.TrailList.Where(t => t.NationalParkId == nationalPark.Id);
+                                    }
+                                    <tbody>
+                                        @foreach (var trail in trails)
+                                        {
+                                            <tr>
+                                                <td>@trail.Name</td>
+                                                <td>@trail.Distance</td>
+                                                <td>@trail.Elevation</td>
+                                                <td>@trail.Difficulty</td>
+                                            </tr>
+                                        }
+
+
+                                    </tbody>
+
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-4 text-center">
+                        @{
+                            if (nationalPark.Picture != null)
+                            {
+                                var base64 = Convert.ToBase64String(nationalPark.Picture);
+                                var imgsrc = string.Format("data:image/jpg;base64,{0}", base64);
+
+                                <img src="@imgsrc" class="card-img-top p-2 rounded" width="100%" />
+                            }
+                        }
+                    </div>
+                    <button class="btn btn-success"
+                            onclick="openBookingModal()">
+                        Book Now
+                    </button>
+                    <div id="bookingModal" class="modal fade">
+                        <div class="modal-dialog">
+                            <div class="modal-content p-3">
+
+                                <h3>Book Appointment</h3>
+
+                                <input class="form-control mt-2" id="name" placeholder="Name" />
+                                <input class="form-control mt-2" id="email" placeholder="Email" />
+                                <input class="form-control mt-2" id="phone" placeholder="Phone" />
+                                <input class="form-control mt-2" type="date" id="date" />
+                                <input class="form-control mt-2" type="number" id="persons" placeholder="Persons (max 5)" />
+
+                                <button onclick="submitBooking()" class="btn btn-primary mt-3">Submit</button>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+            <br />
+        </div>
+
+
+
+    </div>
+
+}
+<script>
+    function openBookingModal() {
+        $("#bookingModal").modal("show");
+    }
+
+    function submitBooking() {
+        const booking = {
+            customerName: $("#name").val(),
+            email: $("#email").val(),
+            phone: $("#phone").val(),
+            bookingDate: $("#date").val(),
+            numberOfPersons: $("#persons").val()
+        };
+
+        $.ajax({
+            url: "https://localhost:7198/api/booking",   // YOUR API PROJECT URL
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(booking),
+            success: () => { alert("Booking submitted!"); },
+            error: (err) => { alert(err.responseText); }
+        });
+    }
+</script>
+
+
+
+
