@@ -4,10 +4,14 @@ using WebApplicationOfNationalParks.Repository.IRepository;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+builder.Services.AddControllersWithViews()
+                .AddRazorRuntimeCompilation();
 
-builder.Services.AddScoped<INationalParkRepository , NationalParkRepository>();
-builder.Services.AddScoped<ITrailRepository , TrailRepository>();
+// Register repositories (Dependency Injection)
+builder.Services.AddScoped<INationalParkRepository, NationalParkRepository>();
+builder.Services.AddScoped<ITrailRepository, TrailRepository>();
+
+// Add HttpClient for API calls
 builder.Services.AddHttpClient();
 
 var app = builder.Build();
@@ -16,8 +20,7 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    app.UseHsts(); // Default HSTS = 30 days
 }
 
 app.UseHttpsRedirection();
@@ -27,6 +30,7 @@ app.UseRouting();
 
 app.UseAuthorization();
 
+// Default route mapping
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

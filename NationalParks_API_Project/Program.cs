@@ -1,6 +1,5 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NationalParks_API_Project;
@@ -13,37 +12,37 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+// ✅ Database connection
 string cs = builder.Configuration.GetConnectionString("constr");
-builder.Services.AddDbContext<ApplicationDbContext>(options  => options.UseSqlServer(cs));
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(cs));
+
+// ✅ Core services
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.WebHost.UseUrls("http://0.0.0.0:10000");
 builder.Services.AddSwaggerGen();
+
+// ✅ Dependency Injection
 builder.Services.AddScoped<INationalParkRepository, NationalParkRepository>();
 builder.Services.AddScoped<ITrailRepository, TrailRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>,
-    ConfigureSwaggerOptions>();
-
+builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
-//JWT Authentication
+// ✅ JWT Authentication
 var appSettingSection = builder.Configuration.GetSection("AppSettings");
 builder.Services.Configure<AppSettings>(appSettingSection);
 var appSetting = appSettingSection.Get<AppSettings>();
 var key = Encoding.ASCII.GetBytes(appSetting.Secret);
-builder.Services.AddAuthentication(x =>
+
+builder.Services.AddAuthentication(options =>
 {
-    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(x =>
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
 {
-    x.RequireHttpsMetadata = false;
-    x.SaveToken = true;
-    x.TokenValidationParameters = new TokenValidationParameters()
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
@@ -51,15 +50,18 @@ builder.Services.AddAuthentication(x =>
         ValidateAudience = false
     };
 });
-//***
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-app.UseSwagger();
-app.UseSwaggerUI();
+// ✅ Middleware pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseHttpsRedirection();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
